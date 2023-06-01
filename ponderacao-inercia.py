@@ -3,7 +3,7 @@ import random
 import math
 
 # Espaço de busca: definição de [xmin,xmax] e [ymin,ymax]
-domain = ((-15,15),(-15,15))
+domain = ((-15,15),(-3,3))
 
 # Constantes
 a = 500
@@ -46,11 +46,11 @@ def bukin(xx):
     return y
 
 # Parâmetros do algoritmo PSO
-n = 20
+n = 30
 gbest = np.zeros(2,float)
 
 # Redução Linear da Ponderação de Inércia
-tmax = 500
+tmax = 100
 wmax = 0.9
 wmin = 0.4
 c1 = 2
@@ -72,24 +72,8 @@ class Particle:
         
     def update_position(self,it):
         
-        # Checar se x de position está em [xmin,xmax]
-        if position[0] < domain[0][0] or position[0] > domain[0][1]:
-            if position[0] < domain[0][0]:
-                position[0] = domain[0][0]
-            elif position[0] > domain[0][1]:
-                position[0] = domain[0][1]
-            self.velocities[it + 1] = np.zeros(2,float)
-        
-        # Checar se y de position está em [ymin,ymax]
-        if position[1] < domain[1][0] or position[1] > domain[1][1]:
-            if position[1] < domain[1][0]:
-                position[0] = domain[1][0]
-            elif position[1] > domain[1][1]:
-                position[0] = domain[1][1]            
-            self.velocities[it + 1] = np.zeros(2,float)
-        
-        # Caso não ultrapasse prossiga o algoritmo
-        if not (position[0] < domain[0][0] or position[0] > domain[0][1]) and not(position[1] < domain[1][0] or position[1] > domain[1][1]):
+        # Verifica se ultrapassou limite de busca
+        if (self.positions[it][0] > domain[0][0] and self.positions[it][0] < domain[0][1]) and (self.positions[it][1] > domain[1][0] and self.positions[it][1] < domain[1][1]):
             # Gera números aleatórios entre 0 e 1 para r1 e r2
             r1 = random.random()
             r2 = random.random()
@@ -106,6 +90,14 @@ class Particle:
             # Inseri-los no histórico de iterações
             self.positions[it + 1] = x
             self.velocities[it + 1] = v
+            
+        # Caso ultrapasse, limite pela menor posição do espaço de busca e atualize a velocidade para zero
+        else:
+            if not(self.positions[it][0] > domain[0][0] and self.positions[it][0] < domain[0][1]):
+                self.positions[it][0] = domain[0][0]
+            if not(self.positions[it][1] > domain[1][0] and self.positions[it][1] < domain[1][1]):
+                self.positions[it][1] = domain[1][0]
+            self.velocities[it] = np.zeros(2,float)
         
 # Iniciar enxame
 swarm = []
@@ -133,7 +125,6 @@ for it in range(0,tmax - 1):
     for particle in swarm:
         
         position = particle.positions[it]
-        print(f"{bukin(position)}")
         
         # Atualizar pbest e gbest
         if bukin(position) < bukin(particle.pbest):
