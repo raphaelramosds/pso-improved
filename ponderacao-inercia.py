@@ -2,8 +2,8 @@ import numpy as np
 import random
 import math
 
-# Espaço de busca
-# x, y = np.meshgrid(np.arange(-500, 501, 5), np.arange(-500, 501, 5))
+# Espaço de busca: definição de [xmin,xmax] e [ymin,ymax]
+domain = ((-15,15),(-15,15))
 
 # Constantes
 a = 500
@@ -46,10 +46,8 @@ def bukin(xx):
     return y
 
 # Parâmetros do algoritmo PSO
-n = 100
+n = 20
 gbest = np.zeros(2,float)
-x0 = np.array([-15,-5],float)
-v0 = np.array([-3,3],float)
 
 # Redução Linear da Ponderação de Inércia
 tmax = 500
@@ -74,26 +72,55 @@ class Particle:
         
     def update_position(self,it):
         
-        # Gera números aleatórios entre 0 e 1 para r1 e r2
-        r1 = random.random()
-        r2 = random.random()
+        # Checar se x de position está em [xmin,xmax]
+        if position[0] < domain[0][0] or position[0] > domain[0][1]:
+            if position[0] < domain[0][0]:
+                position[0] = domain[0][0]
+            elif position[0] > domain[0][1]:
+                position[0] = domain[0][1]
+            self.velocities[it + 1] = np.zeros(2,float)
         
-        # Calcular velocidade
-        inertia = w*self.velocities[it]
-        cognitive = c1*r1*(self.pbest - self.positions[it])
-        social = c2*r2*(gbest - self.positions[it])
-        v = inertia + cognitive + social
+        # Checar se y de position está em [ymin,ymax]
+        if position[1] < domain[1][0] or position[1] > domain[1][1]:
+            if position[1] < domain[1][0]:
+                position[0] = domain[1][0]
+            elif position[1] > domain[1][1]:
+                position[0] = domain[1][1]            
+            self.velocities[it + 1] = np.zeros(2,float)
         
-        # Calcular posição
-        x = v + self.positions[it]
-        
-        # Inseri-los no histórico de iterações
-        self.positions[it + 1] = x
-        self.velocities[it + 1] = v
+        # Caso não ultrapasse prossiga o algoritmo
+        if not (position[0] < domain[0][0] or position[0] > domain[0][1]) and not(position[1] < domain[1][0] or position[1] > domain[1][1]):
+            # Gera números aleatórios entre 0 e 1 para r1 e r2
+            r1 = random.random()
+            r2 = random.random()
+            
+            # Calcular velocidade
+            inertia = w*self.velocities[it]
+            cognitive = c1*r1*(self.pbest - self.positions[it])
+            social = c2*r2*(gbest - self.positions[it])
+            v = inertia + cognitive + social
+            
+            # Calcular posição
+            x = v + self.positions[it]
+            
+            # Inseri-los no histórico de iterações
+            self.positions[it + 1] = x
+            self.velocities[it + 1] = v
         
 # Iniciar enxame
 swarm = []
+
 for i in range(n):
+    
+    # Randomiza posição inicial
+    x0 = np.array([
+        random.randint(-15,-5),
+        random.randint(-3,3)],float)
+    
+    # Velocidade inicial nula
+    v0 = np.array([0,0],float)
+    
+    # Adiciona particular no enxame
     swarm.append(Particle(x0, v0))
 
 # Aplicação do algoritmo
@@ -106,6 +133,7 @@ for it in range(0,tmax - 1):
     for particle in swarm:
         
         position = particle.positions[it]
+        print(f"{bukin(position)}")
         
         # Atualizar pbest e gbest
         if bukin(position) < bukin(particle.pbest):
@@ -113,8 +141,6 @@ for it in range(0,tmax - 1):
         
         if bukin(position) < bukin(gbest):
             gbest = position
-        
-        print(f"{bukin(position)} em {position}")
         
         # Atualizar posição
         particle.update_position(it)
