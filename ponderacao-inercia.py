@@ -32,7 +32,7 @@ def costf(position):
     # Retorno do fitness
     return w35
 
-# Função test: Bukin
+# Função teste I - Bukin
 def bukin(xx):
     x1 = xx[0]
     x2 = xx[1]
@@ -64,31 +64,20 @@ class Particle:
         self.pbest = x0
         
     def update_position(self,it,gbest,w,bounds):
-        
-        # Verifica se ultrapassou limite de busca
-        if (self.positions[it][0] > bounds[0][0] and self.positions[it][0] < bounds[0][1]) and (self.positions[it][1] > bounds[1][0] and self.positions[it][1] < bounds[1][1]):
-            
-            # Gera números aleatórios entre 0 e 1 para r1 e r2
-            r1 = random.random()
-            r2 = random.random()
+           
+        # Gera números aleatórios entre 0 e 1 para r1 e r2
+        r1 = random.random()
+        r2 = random.random()
 
-            # Calcular velocidade
-            inertia = w*self.velocities[it]
-            cognitive = c1*r1*(self.pbest - self.positions[it])
-            social = c2*r2*(gbest - self.positions[it])
-            v = inertia + cognitive + social
-            
-            # Inseri-los no histórico de iterações
-            self.positions[it + 1] = v + self.positions[it]
-            self.velocities[it + 1] = v
-            
-        # Caso ultrapasse, limite pela menor posição do espaço de busca e atualize a velocidade para zero
-        else:
-            if not(self.positions[it][0] > bounds[0][0] and self.positions[it][0] < bounds[0][1]):
-                self.positions[it][0] = bounds[0][0]
-            if not(self.positions[it][1] > bounds[1][0] and self.positions[it][1] < bounds[1][1]):
-                self.positions[it][1] = bounds[1][0]
-            self.velocities[it] = np.zeros(2,float)
+        # Calcular velocidade
+        inertia = w*self.velocities[it]
+        cognitive = c1*r1*(self.pbest - self.positions[it])
+        social = c2*r2*(gbest - self.positions[it])
+        v = inertia + cognitive + social
+        
+        # Inseri-los no histórico de iterações
+        self.positions[it + 1] = v + self.positions[it]
+        self.velocities[it + 1] = v
 
 # Algoritmo PSO
 class PSO:    
@@ -140,4 +129,4 @@ class PSO:
         print(f"Mínimo global: {f(gbest)}")
 
 # Chamada do algoritmo
-PSO(30,100,((-15,-5),(-3,3)),bukin)
+PSO(30,100,((1,2.5),(1,2.5)),costf)
