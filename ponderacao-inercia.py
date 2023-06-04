@@ -2,16 +2,13 @@ import numpy as np
 import random
 import math
 
-# Espaço de busca: definição de [xmin,xmax] e [ymin,ymax]
-bounds = ((-15,-5),(-3,3))
-
 # Constantes
 a = 500
 b = 0.1
 c = 0.5 * np.pi
 
 # Função para ser minimizada
-def f(position):
+def costf(position):
     
     # Componentes das coordenadas
     x = position[0]
@@ -35,7 +32,7 @@ def f(position):
     # Retorno do fitness
     return w35
 
-# Função de Bukin
+# Função test: Bukin
 def bukin(xx):
     x1 = xx[0]
     x2 = xx[1]
@@ -46,11 +43,7 @@ def bukin(xx):
     y = term1 + term2
     return y
 
-# Parâmetros do algoritmo PSO
-n = 5
-
 # Redução Linear da Ponderação de Inércia
-tmax = 40
 wmax = 0.9
 wmin = 0.4
 c1 = 2
@@ -60,7 +53,7 @@ w = 0.5
 # Definição de Partícula
 class Particle:
     
-    def __init__(self, x0,v0):
+    def __init__(self,x0,v0,tmax):
         
         self.pbest = np.zeros(2,float)
         self.positions = np.zeros((tmax,2),float)
@@ -70,7 +63,7 @@ class Particle:
         self.velocities[0] = v0
         self.pbest = x0
         
-    def update_position(self,it):
+    def update_position(self,it,gbest,w,bounds):
         
         # Verifica se ultrapassou limite de busca
         if (self.positions[it][0] > bounds[0][0] and self.positions[it][0] < bounds[0][1]) and (self.positions[it][1] > bounds[1][0] and self.positions[it][1] < bounds[1][1]):
@@ -78,18 +71,15 @@ class Particle:
             # Gera números aleatórios entre 0 e 1 para r1 e r2
             r1 = random.random()
             r2 = random.random()
-                
+
             # Calcular velocidade
             inertia = w*self.velocities[it]
             cognitive = c1*r1*(self.pbest - self.positions[it])
             social = c2*r2*(gbest - self.positions[it])
             v = inertia + cognitive + social
             
-            # Calcular posição
-            x = v + self.positions[it]
-            
             # Inseri-los no histórico de iterações
-            self.positions[it + 1] = x
+            self.positions[it + 1] = v + self.positions[it]
             self.velocities[it + 1] = v
             
         # Caso ultrapasse, limite pela menor posição do espaço de busca e atualize a velocidade para zero
@@ -100,49 +90,54 @@ class Particle:
                 self.positions[it][1] = bounds[1][0]
             self.velocities[it] = np.zeros(2,float)
 
-# Iniciar enxame
-swarm = []
-for i in range(n):
-    
-    # Randomiza posição inicial
-    x0 = np.array([
-        random.uniform(bounds[0][0], bounds[0][1]),
-        random.uniform(bounds[1][0], bounds[1][1])
-    ],float)
-    
-    # Velocidade inicial nula
-    v0 = np.array([0,0],float)
-    
-    # Adiciona particular no enxame
-    swarm.append(Particle(x0, v0))
-
-# Iniciar gbest conforme o enxame inicial
-pbest_fitness = [bukin(particle.pbest) for particle in swarm]
-gbest = swarm[np.argmin(pbest_fitness)].pbest
-
-# Aplicação do algoritmo
-for it in range(0,tmax - 1):
-
-    # Atualizar fator de inércia
-    w = wmax - it*(wmax - wmin)/tmax
-    
-    # Análise das posições: atualização do pbest e gbest
-    for particle in swarm:
+# Algoritmo PSO
+class PSO:    
+    def __init__(self,n,tmax,bounds,f):
         
-        position = particle.positions[it]
+        # Iniciar enxame
+        swarm = []
+        for i in range(n):
+            # Randomiza posição inicial
+            x0 = np.array([
+                random.uniform(bounds[0][0], bounds[0][1]),
+                random.uniform(bounds[1][0], bounds[1][1])
+            ],float)
+            
+            # Velocidade inicial nula
+            v0 = np.array([0,0],float)
+            
+            # Adiciona particular no enxame
+            swarm.append(Particle(x0, v0,tmax))
         
-        # Verificar se sua posição atual é um pbest
-        if bukin(position) < bukin(particle.pbest):
-            particle.pbest = position
+        # Iniciar gbest conforme o enxame inicial
+        pbest_fitness = [f(particle.pbest) for particle in swarm]
+        gbest = swarm[np.argmin(pbest_fitness)].pbest
         
-        # Verificar se sua posição atual é um gbest
-        if bukin(position) < bukin(gbest):
-            gbest = position
+        # Aplicação do algoritmo
+        for it in range(0,tmax - 1):
         
-    # Atualizar posição de cada particula
-    for particle in swarm:
-        particle.update_position(it)
+            # Atualizar fator de inércia
+            w = wmax - it*(wmax - wmin)/tmax
+            
+            # Análise das posições: atualização do pbest e gbest
+            for particle in swarm:
 
-# Resultados
-print(f"Solução: {gbest}")
-print(f"Fitness: {bukin(gbest)}")
+                position = particle.positions[it]
+                
+                # Verificar se sua posição atual é um pbest
+                if f(position) < f(particle.pbest):
+                    particle.pbest = position
+                
+                # Verificar se sua posição atual é um gbest
+                if f(position) < f(gbest):
+                    gbest = position
+            
+                # Atualizar posição da particula
+                particle.update_position(it,gbest,w,bounds)
+                
+        # Resultados
+        print(f"Solução: {gbest}")
+        print(f"Mínimo global: {f(gbest)}")
+
+# Chamada do algoritmo
+PSO(30,100,((-15,-5),(-3,3)),bukin)
