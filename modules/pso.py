@@ -21,7 +21,7 @@ class Particle:
         self.velocities[0] = v0
         self.pbest = x0
         
-    def update_position(self,it,gbest,w,bounds):
+    def update_position(self,it,gbest,w):
            
         # Gera números aleatórios entre 0 e 1 para r1 e r2
         r1 = random.random()
@@ -80,7 +80,7 @@ class PSO:
                     gbest = position
             
                 # Atualizar posição da particula
-                particle.update_position(it,gbest,w,bounds)
+                particle.update_position(it,gbest,w)
                 
         # Resultados
         print(f"Solução: {gbest}")
