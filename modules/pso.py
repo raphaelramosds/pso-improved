@@ -88,7 +88,3 @@ class PSO:
         # Resultados
         self.solution = gbest
         self.minimum = f(gbest)
-    
-        print(f"Solução: {gbest}")
-        print(f"Mínimo global: {f(gbest)}")
-        

@@ -1,5 +1,4 @@
 import sys
-
 import numpy as np
 
 # Caminho para essa pasta
@@ -48,6 +47,16 @@ def costf(position):
     # Retorno do fitness
     return w35
 
-# Chamada do algoritmo
-p = pso.PSO(30,150,((-500,500),(-500,500)),costf)
 
+# Cabeçalho do CSV
+with open('./data.csv','a') as file:
+    file.write("particles,iterations,x,y,fitness\n")
+    for n in range(25):
+        # Chamada 1: particulas aumentam de 5 a 30, iterações constantes
+        for i in range(5,30 + 5,5):
+            p = pso.PSO(i,10,((-500,500),(-500,500)),costf)
+            file.write(f"{i},{10},{p.solution[0]},{p.solution[1]},{p.minimum}\n")
+        # Chamada 2: iterações aumentam de 25 a 100, particulas constantes
+        for i in range(25,100 + 25,25):
+            p = pso.PSO(30,i,((-500,500),(-500,500)),costf)
+            file.write(f"{30},{i},{p.solution[0]},{p.solution[1]},{p.minimum}\n")
