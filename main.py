@@ -49,4 +49,5 @@ def costf(position):
     return w35
 
 # Chamada do algoritmo
-pso.PSO(30,100,((-500,500),(-500,500)),costf)
+p = pso.PSO(30,150,((-500,500),(-500,500)),costf)
+
