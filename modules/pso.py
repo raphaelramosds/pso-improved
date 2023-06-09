@@ -1,3 +1,6 @@
+
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
 import numpy as np
 import random
 
@@ -85,3 +88,19 @@ class PSO:
         # Resultados
         print(f"Solução: {gbest}")
         print(f"Mínimo global: {f(gbest)}")
+        
+        px = [particle.pbest[0] for particle in swarm]
+        py = [particle.pbest[1] for particle in swarm]
+        pz = [f(particle.pbest) for particle in swarm]
+        
+        plot_particles(px, py, pz, n, tmax, gbest, f(gbest))
+
+# Gráfico de dispersão 3D da última iteração
+def plot_particles(x,y,z,n,tmax,gbest, fitness):
+    fig = plt.figure(figsize = (10, 7))
+    ax = plt.axes(projection ="3d")
+    ax.grid(b = True, color ='grey', linestyle ='-.', linewidth = 0.3, alpha = 0.2) 
+    ax.scatter3D(x, y, z, color = "blue")
+    plt.suptitle(f"Mínimo local: {fitness:.2f}", fontweight="bold")
+    plt.title(f"{tmax} iterações com {n} particulas")
+    plt.show()

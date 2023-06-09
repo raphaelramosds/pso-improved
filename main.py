@@ -1,12 +1,13 @@
 import sys
 
+import numpy as np
+
 # Caminho para essa pasta
 path = "C:/Users/rapha/Documents/pso-improved"
 
 # Adicionar módulos adicionais
 sys.path.append(path)
 
-import numpy as np
 from modules import pso
 
 # Função do trabalho
@@ -49,3 +50,16 @@ def costf(position):
 
 # Chamada do algoritmo
 pso.PSO(30,100,((-500,500),(-500,500)),costf)
+
+# Cálculo do Valor mínimo real
+min_value = -500
+max_value = 500
+step = 10
+x_values = np.arange(min_value, max_value + step, step)
+y_values = np.arange(min_value, max_value + step, step)
+values_list = []
+for x in x_values:
+    for y in y_values:
+        position = [x, y]
+        value = costf(position)
+        values_list.append(value)
