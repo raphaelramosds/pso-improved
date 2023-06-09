@@ -1,6 +1,3 @@
-
-import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
 import numpy as np
 import random
 
@@ -10,6 +7,9 @@ wmin = 0.4
 c1 = 2
 c2 = 2
 w = 0.5
+
+vmin = np.array([0,0], float)
+vmax = np.array([10,10], float)
 
 # Definição de Partícula
 class Particle:
@@ -36,9 +36,27 @@ class Particle:
         social = c2*r2*(gbest - self.positions[it])
         v = inertia + cognitive + social
         
+        self.fix_velocity(v)
+
         # Inseri-los no histórico de iterações
         self.positions[it + 1] = v + self.positions[it]
         self.velocities[it + 1] = v
+    
+    def fix_velocity(self,v):
+        max_velocity = abs(v) > abs(vmax)
+        min_velocity = abs(v) < abs(vmin)
+        
+        if True in max_velocity:
+            if max_velocity[0]:
+                v[0] = vmax[0]
+            if max_velocity[1]:
+                v[1] = vmin[1]
+        
+        if True in min_velocity:
+            if min_velocity[0]:
+                v[0] = vmin[0]
+            if min_velocity[1]:
+                v[1] = vmin[1]
 
 # Algoritmo PSO
 class PSO:    

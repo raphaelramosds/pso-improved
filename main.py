@@ -6,7 +6,6 @@ path = "C:/Users/rapha/Documents/pso-improved"
 
 # Adicionar módulos adicionais
 sys.path.append(path)
-
 from modules import pso
 
 # Função do trabalho
@@ -46,7 +45,6 @@ def costf(position):
     
     # Retorno do fitness
     return w35
-
 
 # Cabeçalho do CSV
 with open('./data.csv','a') as file:
